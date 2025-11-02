@@ -165,13 +165,12 @@ export interface User {
  */
 export interface Media {
   id: string;
+  alt?: string | null;
   /**
-   * Cloudinary URL
+   * Cloudinary URL - use this in your frontend
    */
   cloudinary_url?: string | null;
   public_id?: string | null;
-  resource_type?: string | null;
-  original_filename?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1871,10 +1870,9 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   cloudinary_url?: T;
   public_id?: T;
-  resource_type?: T;
-  original_filename?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
