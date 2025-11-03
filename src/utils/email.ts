@@ -169,52 +169,113 @@ export async function sendAutoReply(data: ContactFormData) {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f9f9f9;
           }
           .header {
             background-color: #ff6b35;
             color: white;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             border-radius: 5px 5px 0 0;
           }
           .content {
             background-color: white;
             padding: 30px;
-            border: 1px solid #e0e0e0;
             border-radius: 0 0 5px 5px;
+          }
+          .field {
+            margin-bottom: 20px;
+          }
+          .label {
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 5px;
+          }
+          .value {
+            color: #333;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+          }
+          .message-box {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-left: 4px solid #ff6b35;
+            margin-top: 10px;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h2>Thank You for Contacting Us!</h2>
+            <h2>🔔 New Contact Form Submission</h2>
           </div>
           <div class="content">
-            <p>Hi ${data.first_name},</p>
+            <div class="field">
+              <div class="label">Name:</div>
+              <div class="value">${data.first_name} ${data.last_name}</div>
+            </div>
             
-            <p>Thank you for reaching out to us. We have received your message and will get back to you as soon as possible.</p>
+            <div class="field">
+              <div class="label">Email:</div>
+              <div class="value">
+                <a href="mailto:${data.email_address}">${data.email_address}</a>
+              </div>
+            </div>
             
-            <p><strong>Your message:</strong></p>
-            <p style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #ff6b35;">
-              ${data.message.replace(/\n/g, '<br>')}
-            </p>
+            <div class="field">
+              <div class="label">Phone:</div>
+              <div class="value">
+                <a href="tel:${data.phone}">${data.phone}</a>
+              </div>
+            </div>
             
-            <p>We typically respond within 24-48 hours during business days.</p>
+            ${
+              data.city
+                ? `
+            <div class="field">
+              <div class="label">City:</div>
+              <div class="value">${data.city}</div>
+            </div>
+            `
+                : ''
+            }
             
-            <p>Best regards,<br>
-            Your Team</p>
+            <div class="field">
+              <div class="label">Message:</div>
+              <div class="message-box">${data.message.replace(/\n/g, '<br>')}</div>
+            </div>
+            
+            <div class="field">
+              <div class="label">Submitted At:</div>
+              <div class="value">${new Date(data.createdAt || Date.now()).toLocaleString()}</div>
+            </div>
           </div>
         </div>
       </body>
     </html>
   `
 
+  const emailText = `
+New Contact Form Submission
+
+Name: ${data.first_name} ${data.last_name}
+Email: ${data.email_address}
+Phone: ${data.phone}
+${data.city ? `City: ${data.city}` : ''}
+
+Message:
+${data.message}
+
+Submitted at: ${new Date(data.createdAt || Date.now()).toLocaleString()}
+  `
+
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_FROM || 'noreply@yoursite.com',
-      to: data.email_address,
-      subject: 'Thank you for contacting us',
+      to: process.env.EMAIL_FOR,
+      subject: `New Contact Form Submission from ${data.first_name} ${data.last_name}`,
+      text: emailText,
       html: emailHtml,
     })
     console.log('✅ Auto-reply email sent successfully')
